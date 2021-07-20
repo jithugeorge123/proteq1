@@ -1,0 +1,121 @@
+//creating database
+use ('test')
+
+//creating Collectiom
+db.createCollection('employee')
+
+db.createCollection('project')
+
+//inserting documents
+db.employee.insertMany([{_id:123,emp_name:"John Brew",location:"bangalore",parent:"employee"},
+{_id:556,emp_name:"Cathy Johns",location:"Mumbai",parent:"employee"},
+{_id:342,emp_name:"Scott Davis",location:"bangalore",parent:"employee"},
+{_id:"employee",parent:null}
+]);
+
+
+db.project.insertMany([{_id:222,proj_name:"foodie",proj_desc:"food delivery",emp_id:123,parent:"project"},
+{_id:234,proj_name:"medicare",proj_desc:"meds delivery",emp_id:556,parent:"project"},
+{_id:242,proj_name:"ipay",proj_desc:"banking",emp_id:342,parent:"project"},
+{_id:"project",parent:null}
+]);
+
+
+//Retrieve the Document
+db.employee.find().pretty()
+
+db.project.find().pretty()
+
+db.employee.find({
+    "location" : { "$in": ["bangalore"] },
+    "_id" : { "$in": [342] },
+})
+
+
+db.project.find({
+    "_id" : { "$in": [234,242] },
+})
+
+
+// Retrieve using filter
+db.employee.aggregate([
+     { 
+        "$match": {
+            "location" : { "$in": ["bangalore"] },
+            "_id" : { "$in": [342] },
+        }
+     }
+])
+
+
+
+db.project.aggregate([
+     { 
+        "$match": {
+            "parent" : { "$in": ["project"] },
+            "_id" : { "$in": [234,242] },
+        }
+     }
+])
+
+//Updating the existing Document
+
+db.employee.updateOne(
+    {emp_name:"John Brew"},
+    {$set:{location:"Mumbai"}}
+)
+
+db.project.aggregate([
+     { 
+        "$match": {
+            "parent" : { "$in": ["project"] },
+            "_id" : { "$in": [234] },
+        }
+        
+     },
+     {$set:{proj_name:"Medicity"}}
+])
+
+
+// Deleting the existing Document
+db.employee.deleteOne({
+    _id:342
+})
+
+
+
+db.project.remove({
+    "_id" : { "$in": [234] }
+},true)
+
+
+
+//Retrieving the data from Multiple Collections
+db.employee.aggregate([
+    {
+        /**
+         * from: The target collection.
+         * localField: The local join field.
+         * foreignField: The target join field.
+         * as: The name for the results.
+         * pipeline: The pipeline to run on the joined collection.
+         * let: Optional variables to use in the pipeline field stages.
+         */
+        $lookup: {
+          from: 'project',
+          localField: '_id',
+          foreignField: 'emp_id',
+          as: 'project'
+        }
+    }
+])
+
+
+
+
+
+
+
+
+     
+
